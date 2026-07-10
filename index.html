@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A premium, modern digital clock with customizable fonts, independent colors, and custom bottom notes. Fits all displays perfectly.">
+  <meta name="theme-color" content="#000000">
+  <title>Premium Digital Clock</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <!-- Empty space on left since Logo was removed -->
+      <div></div>
+      <button class="settings-toggle" id="settingsToggleBtn" aria-label="Open Settings" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gear-icon">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <main class="app-main">
+      <div class="clock-display-wrapper">
+        <div class="clock-display" id="clockDisplay">
+          <!-- Active clock digits layer split for independent styling -->
+          <div class="clock-layer clock-time" id="clockTime" role="timer" aria-live="polite">
+            <span class="time-primary" id="timePrimary">00:00</span><span class="time-colon">:</span><span class="time-seconds" id="timeSeconds">00</span>
+          </div>
+        </div>
+        <!-- Note Display Area -->
+        <div class="clock-note" id="clockNote" aria-live="polite"></div>
+      </div>
+    </main>
+
+    <!-- Footer container kept empty for minimalist spacing layout -->
+    <footer class="app-footer"></footer>
+  </div>
+
+  <!-- Settings drawer sidebar -->
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
+    <div class="settings-header">
+      <h2>Customizer</h2>
+      <button class="settings-close" id="settingsCloseBtn" aria-label="Close Settings" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="close-icon">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="settings-content">
+      <!-- Font family section -->
+      <div class="settings-group">
+        <label for="fontSelector" class="settings-label">Typography</label>
+        <div class="select-wrapper">
+          <select id="fontSelector" aria-label="Select clock font">
+            <option value="Orbitron">Orbitron (Sci-Fi)</option>
+            <option value="Roboto Mono">Roboto Mono (Tech)</option>
+            <option value="Digital-7">Digital-7 (LCD)</option>
+            <option value="Poppins">Poppins (Modern Clean)</option>
+            <option value="Montserrat">Montserrat (Geometric)</option>
+            <option value="JetBrains Mono">JetBrains Mono (Dev)</option>
+            <option value="Space Grotesk">Space Grotesk (Futuristic)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Custom Note section -->
+      <div class="settings-group">
+        <label for="noteInput" class="settings-label">Bottom Note</label>
+        <input type="text" id="noteInput" placeholder="Enter a reminder, name, or goal..." maxlength="50" aria-label="Enter clock bottom note">
+      </div>
+
+      <!-- Primary Clock Color section -->
+      <div class="settings-group">
+        <span class="settings-label">Primary Color (HH:MM)</span>
+        <div class="color-presets" id="primaryPresets" role="radiogroup" aria-label="Choose primary clock color preset">
+          <button class="color-preset-btn" data-color="#ffffff" style="--btn-color: #ffffff;" aria-label="White" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff3b30" style="--btn-color: #ff3b30;" aria-label="Red" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#007aff" style="--btn-color: #007aff;" aria-label="Blue" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#34c759" style="--btn-color: #34c759;" aria-label="Green" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ffcc00" style="--btn-color: #ffcc00;" aria-label="Yellow" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#32ade6" style="--btn-color: #32ade6;" aria-label="Cyan" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff9500" style="--btn-color: #ff9500;" aria-label="Orange" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#af52de" style="--btn-color: #af52de;" aria-label="Purple" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff2d55" style="--btn-color: #ff2d55;" aria-label="Pink" role="radio" aria-checked="false"></button>
+        </div>
+        <div class="custom-color-picker-wrapper">
+          <input type="color" id="primaryColorPicker" value="#ffffff" aria-label="Choose custom primary color">
+          <label for="primaryColorPicker" class="custom-color-picker-label" id="primaryColorLabel">
+            <span class="color-preview" id="primaryColorPreview" style="background-color: #ffffff;"></span>
+            <span class="color-value" id="primaryColorValue">#FFFFFF</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Seconds Clock Color section -->
+      <div class="settings-group">
+        <span class="settings-label">Seconds Color (SS)</span>
+        <div class="color-presets" id="secondsPresets" role="radiogroup" aria-label="Choose seconds clock color preset">
+          <button class="color-preset-btn" data-color="#ffffff" style="--btn-color: #ffffff;" aria-label="White" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff3b30" style="--btn-color: #ff3b30;" aria-label="Red" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#007aff" style="--btn-color: #007aff;" aria-label="Blue" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#34c759" style="--btn-color: #34c759;" aria-label="Green" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ffcc00" style="--btn-color: #ffcc00;" aria-label="Yellow" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#32ade6" style="--btn-color: #32ade6;" aria-label="Cyan" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff9500" style="--btn-color: #ff9500;" aria-label="Orange" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#af52de" style="--btn-color: #af52de;" aria-label="Purple" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff2d55" style="--btn-color: #ff2d55;" aria-label="Pink" role="radio" aria-checked="false"></button>
+        </div>
+        <div class="custom-color-picker-wrapper">
+          <input type="color" id="secondsColorPicker" value="#ffffff" aria-label="Choose custom seconds color">
+          <label for="secondsColorPicker" class="custom-color-picker-label" id="secondsColorLabel">
+            <span class="color-preview" id="secondsColorPreview" style="background-color: #ffffff;"></span>
+            <span class="color-value" id="secondsColorValue">#FFFFFF</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay behind panel -->
+  <div class="settings-overlay" id="settingsOverlay" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

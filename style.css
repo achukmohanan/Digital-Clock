@@ -1,0 +1,552 @@
+/* ==========================================================================
+   Typography & CDN Font Declarations
+   ========================================================================== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+/* Import Digital-7 segment font from global CDN */
+@font-face {
+  font-family: 'Digital-7';
+  src: url('https://cdn.jsdelivr.net/gh/kevincennis/Mix.js@master/public/fonts/digital-7.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==========================================================================
+   Design System Variables & Root Declarations
+   ========================================================================== */
+:root {
+  /* Default Colors */
+  --bg-color: #000000;
+  --primary-color: #ffffff;
+  --seconds-color: #ffffff;
+  
+  /* Font Family Selection */
+  --font-family: 'Orbitron', sans-serif;
+  
+  /* Component Styles */
+  --panel-bg: rgba(10, 10, 10, 0.75);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  
+  /* Motion System */
+  --transition-speed: 0.3s;
+  --transition-ease: cubic-bezier(0.16, 1, 0.3, 1); /* OutExpo */
+}
+
+/* ==========================================================================
+   Global Resets
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: #ffffff;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==========================================================================
+   App Elements
+   ========================================================================== */
+
+/* Main Container Grid layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Settings Toggle Button */
+.settings-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-speed), 
+              background-color var(--transition-speed), 
+              transform 0.4s var(--transition-ease);
+  outline: none;
+  z-index: 10;
+}
+
+.settings-toggle:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: rotate(60deg);
+}
+
+.settings-toggle:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 4px;
+}
+
+.gear-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ==========================================================================
+   Clock Main Layout
+   ========================================================================== */
+.app-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.clock-display-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1.8rem; /* Space between clock digits and bottom note */
+}
+
+.clock-display {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: fit-content;
+  user-select: none;
+}
+
+.clock-layer {
+  grid-area: 1 / 1;
+  font-family: var(--font-family);
+  font-size: clamp(2.8rem, 16vw, 13rem);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: font-family var(--transition-speed) var(--transition-ease);
+}
+
+/* Clock Digits - Completely sharp and solid without fuzzy shade/glow */
+.time-primary {
+  color: var(--primary-color);
+  transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.time-colon {
+  color: var(--primary-color);
+  transition: color var(--transition-speed) var(--transition-ease);
+}
+
+.time-seconds {
+  color: var(--seconds-color);
+  transition: color var(--transition-speed) var(--transition-ease);
+}
+
+/* Adjust letters and baseline for Digital-7 */
+.body-font-digital-7 .clock-layer {
+  letter-spacing: 0.05em;
+}
+
+/* Bottom Note style */
+.clock-note {
+  font-family: var(--font-family);
+  font-size: clamp(0.95rem, 2.2vw, 1.6rem);
+  color: var(--primary-color); /* Defaults to match HH:MM primary color */
+  opacity: 0.55; /* Softly faded for a premium minimalist backdrop effect */
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  max-width: 80%;
+  word-break: break-word;
+  white-space: pre-wrap; /* Preserve spaces and linebreaks if any */
+  transition: font-family var(--transition-speed) var(--transition-ease),
+              color var(--transition-speed) var(--transition-ease),
+              opacity var(--transition-speed) var(--transition-ease);
+}
+
+/* Adjust letter-spacing for LCD font on note */
+.body-font-digital-7 .clock-note {
+  letter-spacing: 0.12em;
+}
+
+/* ==========================================================================
+   Settings Drawer Panel
+   ========================================================================== */
+.settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-left: 1px solid var(--panel-border);
+  z-index: 100;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+}
+
+.settings-panel.open {
+  transform: translateX(0);
+  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Blurred layout overlay */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Drawer Header */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-shrink: 0;
+}
+
+.settings-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.settings-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-speed), background-color var(--transition-speed);
+}
+
+.settings-close:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.close-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* Scrollable Settings Content Area */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbar for Settings Menu */
+.settings-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Control Groupings */
+.settings-group {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.settings-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+/* Custom Typography Select Dropdown & Input controls */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper::after {
+  content: "";
+  position: absolute;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  transition: border-top-color var(--transition-speed);
+}
+
+.select-wrapper:hover::after {
+  border-top-color: #ffffff;
+}
+
+#fontSelector, #noteInput {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 1rem 1.2rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color var(--transition-speed), 
+              background-color var(--transition-speed), 
+              box-shadow var(--transition-speed);
+  outline: none;
+}
+
+#noteInput {
+  cursor: text;
+}
+
+#noteInput::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+#fontSelector:hover, #noteInput:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+#fontSelector:focus-visible, #noteInput:focus-visible {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+#fontSelector option {
+  background: #0c0c0c;
+  color: #ffffff;
+  padding: 0.8rem;
+}
+
+/* Preset Colors Grid */
+.color-presets {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.5rem;
+}
+
+.color-preset-btn {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background-color: var(--btn-color);
+  cursor: pointer;
+  transition: transform 0.25s var(--transition-ease), 
+              border-color var(--transition-speed);
+  position: relative;
+}
+
+.color-preset-btn::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  transition: border-color var(--transition-speed) var(--transition-ease);
+}
+
+.color-preset-btn:hover {
+  transform: scale(1.12);
+}
+
+.color-preset-btn.active::after {
+  border-color: #ffffff;
+}
+
+/* Custom Color Picker */
+.custom-color-picker-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.custom-color-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  transition: border-color var(--transition-speed), 
+              background-color var(--transition-speed),
+              box-shadow var(--transition-speed);
+}
+
+.custom-color-picker-label:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+input[type="color"]:focus-visible + .custom-color-picker-label {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+.color-preview {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: inline-block;
+  transition: background-color var(--transition-speed);
+  position: relative;
+}
+
+.custom-color-picker-label.active .color-preview::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid #ffffff;
+  border-radius: 50%;
+}
+
+.color-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Footer Layout
+   ========================================================================== */
+.app-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   Responsiveness & Layout Scaling
+   ========================================================================== */
+
+/* Adjust heights and spacing for landscape screens */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-container {
+    padding: 1rem 2rem;
+  }
+  .settings-panel {
+    padding: 1.5rem;
+  }
+  .settings-header {
+    margin-bottom: 1rem;
+  }
+  .settings-group {
+    margin-bottom: 1.2rem;
+  }
+  .clock-layer {
+    font-size: clamp(2rem, 16vh, 8rem);
+  }
+  .clock-display-wrapper {
+    gap: 0.8rem;
+  }
+}
+
+/* Adjust width of panel on mobile */
+@media (max-width: 400px) {
+  .settings-panel {
+    max-width: 100%;
+  }
+  .color-presets {
+    gap: 0.4rem;
+  }
+}
