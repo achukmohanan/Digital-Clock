@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Full-screen perimeter progress path -->
+  <svg class="screen-border-svg" aria-hidden="true">
+    <path id="borderPath"></path>
+  </svg>
+
   <div class="app-container">
     <header class="app-header">
       <!-- Empty space on left since Logo was removed -->
@@ -29,8 +34,8 @@
             <span class="time-primary" id="timePrimary">00:00</span><span class="time-colon">:</span><span class="time-seconds" id="timeSeconds">00</span>
           </div>
         </div>
-        <!-- Note Display Area -->
-        <div class="clock-note" id="clockNote" aria-live="polite"></div>
+        <!-- Notes Display Area -->
+        <div class="clock-note-list" id="clockNoteList" aria-live="polite"></div>
       </div>
     </main>
 
@@ -69,8 +74,22 @@
 
       <!-- Custom Note section -->
       <div class="settings-group">
-        <label for="noteInput" class="settings-label">Bottom Note</label>
-        <input type="text" id="noteInput" placeholder="Enter a reminder, name, or goal..." maxlength="50" aria-label="Enter clock bottom note">
+        <label for="noteInput" class="settings-label">Bottom Notes</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="noteInput" placeholder="Add a note (Press Enter)..." maxlength="50" aria-label="Enter clock bottom note">
+          <button id="addNoteBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.08); color: white; padding: 0 1rem; border-radius: 12px; cursor: pointer; font-family: 'Poppins', sans-serif;">Add</button>
+        </div>
+        <ul id="settingsNoteList" style="list-style: none; margin-top: 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.4rem;"></ul>
+      </div>
+
+      <!-- Progress Line Toggle Switch -->
+      <div class="settings-group">
+        <span class="settings-label">Progress Border</span>
+        <label class="switch-container">
+          <input type="checkbox" id="lineToggle" checked>
+          <span class="switch-slider"></span>
+          <span class="switch-text" id="lineToggleText">Enabled</span>
+        </label>
       </div>
 
       <!-- Primary Clock Color section -->
@@ -115,6 +134,29 @@
           <label for="secondsColorPicker" class="custom-color-picker-label" id="secondsColorLabel">
             <span class="color-preview" id="secondsColorPreview" style="background-color: #ffffff;"></span>
             <span class="color-value" id="secondsColorValue">#FFFFFF</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Line Color section -->
+      <div class="settings-group">
+        <span class="settings-label">Line Color</span>
+        <div class="color-presets" id="linePresets" role="radiogroup" aria-label="Choose line color preset">
+          <button class="color-preset-btn" data-color="#ffffff" style="--btn-color: #ffffff;" aria-label="White" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff3b30" style="--btn-color: #ff3b30;" aria-label="Red" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#007aff" style="--btn-color: #007aff;" aria-label="Blue" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#34c759" style="--btn-color: #34c759;" aria-label="Green" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ffcc00" style="--btn-color: #ffcc00;" aria-label="Yellow" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#32ade6" style="--btn-color: #32ade6;" aria-label="Cyan" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff9500" style="--btn-color: #ff9500;" aria-label="Orange" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#af52de" style="--btn-color: #af52de;" aria-label="Purple" role="radio" aria-checked="false"></button>
+          <button class="color-preset-btn" data-color="#ff2d55" style="--btn-color: #ff2d55;" aria-label="Pink" role="radio" aria-checked="false"></button>
+        </div>
+        <div class="custom-color-picker-wrapper">
+          <input type="color" id="lineColorPicker" value="#ffffff" aria-label="Choose custom line color">
+          <label for="lineColorPicker" class="custom-color-picker-label" id="lineColorLabel">
+            <span class="color-preview" id="lineColorPreview" style="background-color: #ffffff;"></span>
+            <span class="color-value" id="lineColorValue">#FFFFFF</span>
           </label>
         </div>
       </div>

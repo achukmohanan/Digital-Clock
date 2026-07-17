@@ -22,6 +22,7 @@
   --bg-color: #000000;
   --primary-color: #ffffff;
   --seconds-color: #ffffff;
+  --line-color: #ffffff;
   
   /* Font Family Selection */
   --font-family: 'Orbitron', sans-serif;
@@ -58,6 +59,25 @@ html, body {
 /* ==========================================================================
    App Elements
    ========================================================================== */
+
+/* Perimeter border progress SVG */
+.screen-border-svg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99; /* Display on top of clock, but below drawer overlay */
+}
+
+#borderPath {
+  stroke: var(--line-color);
+  stroke-width: 3px;
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke var(--transition-speed) var(--transition-ease);
+}
 
 /* Main Container Grid layout */
 .app-container {
@@ -173,26 +193,60 @@ html, body {
   letter-spacing: 0.05em;
 }
 
-/* Bottom Note style */
-.clock-note {
+/* Bottom Notes style */
+.clock-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  max-width: 80%;
+  width: 100%;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
   font-family: var(--font-family);
-  font-size: clamp(0.95rem, 2.2vw, 1.6rem);
-  color: var(--primary-color); /* Defaults to match HH:MM primary color */
-  opacity: 0.55; /* Softly faded for a premium minimalist backdrop effect */
+  font-size: clamp(0.7rem, 1.5vw, 1.1rem); /* Small by default */
+  color: var(--primary-color);
+  opacity: 0.55;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-align: center;
-  max-width: 80%;
   word-break: break-word;
-  white-space: pre-wrap; /* Preserve spaces and linebreaks if any */
-  transition: font-family var(--transition-speed) var(--transition-ease),
-              color var(--transition-speed) var(--transition-ease),
-              opacity var(--transition-speed) var(--transition-ease);
+  transition: all var(--transition-speed) var(--transition-ease);
+  cursor: pointer;
+}
+
+.note-item:hover {
+  opacity: 0.8;
+}
+
+/* Highlight the first note */
+.note-item.highlight {
+  opacity: 1;
+  font-size: clamp(0.9rem, 2vw, 1.4rem); /* Larger font */
+  font-weight: 600;
+  color: #ffffff; /* Bright white for highlight */
+  text-shadow: 0 0 10px rgba(255,255,255,0.3); /* Slight glow for emphasis */
+}
+
+.note-checkbox {
+  accent-color: var(--primary-color);
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.note-item.checked .note-text {
+  text-decoration: line-through;
+  opacity: 0.5;
 }
 
 /* Adjust letter-spacing for LCD font on note */
-.body-font-digital-7 .clock-note {
+.body-font-digital-7 .note-item {
   letter-spacing: 0.12em;
 }
 

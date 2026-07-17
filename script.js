@@ -9,13 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   const timePrimary = document.getElementById('timePrimary');
   const timeSeconds = document.getElementById('timeSeconds');
-  const clockNote = document.getElementById('clockNote');
+  const clockNoteList = document.getElementById('clockNoteList');
   const settingsPanel = document.getElementById('settingsPanel');
   const settingsOverlay = document.getElementById('settingsOverlay');
   const settingsToggleBtn = document.getElementById('settingsToggleBtn');
   const settingsCloseBtn = document.getElementById('settingsCloseBtn');
   const fontSelector = document.getElementById('fontSelector');
   const noteInput = document.getElementById('noteInput');
+  const addNoteBtn = document.getElementById('addNoteBtn');
+  const settingsNoteList = document.getElementById('settingsNoteList');
+  const borderPath = document.getElementById('borderPath');
+  const lineToggle = document.getElementById('lineToggle');
+  const lineToggleText = document.getElementById('lineToggleText');
   
   // Primary Color Selectors
   const primaryPresets = document.getElementById('primaryPresets');
@@ -30,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const secondsColorLabel = document.getElementById('secondsColorLabel');
   const secondsColorPreview = document.getElementById('secondsColorPreview');
   const secondsColorValue = document.getElementById('secondsColorValue');
+
+  // Line Color Selectors
+  const linePresets = document.getElementById('linePresets');
+  const lineColorPicker = document.getElementById('lineColorPicker');
+  const lineColorLabel = document.getElementById('lineColorLabel');
+  const lineColorPreview = document.getElementById('lineColorPreview');
+  const lineColorValue = document.getElementById('lineColorValue');
 
   // ==========================================================================
   // Configuration Mappings & State
@@ -50,7 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     PRIMARY_COLOR: 'chronos_primary_color',
     PRIMARY_CUSTOM: 'chronos_primary_custom',
     SECONDS_COLOR: 'chronos_seconds_color',
-    SECONDS_CUSTOM: 'chronos_seconds_custom'
+    SECONDS_CUSTOM: 'chronos_seconds_custom',
+    LINE_COLOR: 'chronos_line_color',
+    LINE_CUSTOM: 'chronos_line_custom',
+    LINE_ENABLED: 'chronos_line_enabled'
   };
 
   const presetColors = [
@@ -65,16 +80,34 @@ document.addEventListener('DOMContentLoaded', () => {
     '#ff2d55'  // Pink
   ];
 
+  let totalLength = 0;
+  let lastSecond = -1;
+
+  // ==========================================================================
+  // Perimeter SVG Path Calculations
+  // ==========================================================================
+  function updatePath() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const inset = 2.5; // Preventing border clipping on screen edges
+    
+    // Draw: top-center -> top-right -> bottom-right -> bottom-left -> top-left -> top-center
+    const d = `M ${w/2} ${inset} L ${w - inset} ${inset} L ${w - inset} ${h - inset} L ${inset} ${h - inset} L ${inset} ${inset} Z`;
+    borderPath.setAttribute('d', d);
+    
+    totalLength = borderPath.getTotalLength();
+    borderPath.style.strokeDasharray = totalLength;
+  }
+
   // ==========================================================================
   // Precision Clock Ticker Loop
   // ==========================================================================
-  let lastSecond = -1;
-
   function tick() {
     const now = new Date();
     const currentSecond = now.getSeconds();
+    const milliseconds = now.getMilliseconds();
     
-    // Only update elements when seconds tick to maximize CPU efficiency
+    // 1. Text update: only once per second to reduce layouts/repaints
     if (currentSecond !== lastSecond) {
       lastSecond = currentSecond;
       
@@ -84,6 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       timePrimary.textContent = `${hours}:${minutes}`;
       timeSeconds.textContent = seconds;
+    }
+
+    // 2. SVG border animation: updates smoothly on every frame (approx 60fps)
+    if (totalLength > 0 && lineToggle.checked) {
+      const preciseSeconds = currentSecond + milliseconds / 1000;
+      const progress = preciseSeconds / 60;
+      const dashoffset = totalLength * (1 - progress);
+      borderPath.style.strokeDashoffset = dashoffset;
     }
     
     requestAnimationFrame(tick);
@@ -156,6 +197,37 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
+   * Applies active display color properties for perimeter trace line
+   */
+  function applyLineColor(hexColor, isCustom = false) {
+    document.documentElement.style.setProperty('--line-color', hexColor);
+
+    // Update active indicators in the line presets
+    const presetButtons = linePresets.querySelectorAll('.color-preset-btn');
+    presetButtons.forEach(btn => {
+      if (btn.getAttribute('data-color').toLowerCase() === hexColor.toLowerCase() && !isCustom) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-checked', 'false');
+      }
+    });
+
+    // Update custom color picker display
+    if (isCustom) {
+      lineColorLabel.classList.add('active');
+      lineColorPreview.style.backgroundColor = hexColor;
+      lineColorValue.textContent = hexColor.toUpperCase();
+      lineColorPicker.value = hexColor;
+    } else {
+      lineColorLabel.classList.remove('active');
+    }
+
+    localStorage.setItem(STORAGE_KEYS.LINE_COLOR, hexColor);
+  }
+
+  /**
    * Sets current active typography and triggers LCD styling classes
    */
   function applyFont(fontName) {
@@ -174,21 +246,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Applies the note display text and updates cache
+   * Render Notes List
    */
-  function applyNote(noteText) {
-    clockNote.textContent = noteText;
-    
-    // Hide or show element based on whether note is empty to prevent blank gaps
-    if (noteText.trim() === '') {
-      clockNote.style.display = 'none';
-    } else {
-      clockNote.style.display = 'block';
-    }
-    
-    noteInput.value = noteText;
-    localStorage.setItem(STORAGE_KEYS.NOTE, noteText);
+  let notesData = [];
+
+  function renderNotes() {
+    clockNoteList.innerHTML = '';
+    settingsNoteList.innerHTML = '';
+
+    notesData.forEach((note, index) => {
+      // Main Display Note Item
+      const label = document.createElement('label');
+      label.className = `note-item ${note.checked ? 'checked' : ''} ${index === 0 ? 'highlight' : ''}`;
+      
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'note-checkbox';
+      checkbox.checked = note.checked;
+      checkbox.addEventListener('change', (e) => {
+        notesData[index].checked = e.target.checked;
+        saveAndRenderNotes();
+      });
+
+      const span = document.createElement('span');
+      span.className = 'note-text';
+      span.textContent = note.text;
+
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      clockNoteList.appendChild(label);
+
+      // Settings Display Note Item
+      const li = document.createElement('li');
+      li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);';
+      
+      const setSpan = document.createElement('span');
+      setSpan.textContent = note.text;
+      setSpan.style.cssText = `color: white; font-size: 0.9rem; font-family: 'Poppins', sans-serif; ${note.checked ? 'text-decoration: line-through; opacity: 0.5;' : ''}`;
+      
+      const delBtn = document.createElement('button');
+      delBtn.innerHTML = '&times;';
+      delBtn.style.cssText = 'background: rgba(255,0,0,0.2); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;';
+      delBtn.addEventListener('click', () => {
+        notesData.splice(index, 1);
+        saveAndRenderNotes();
+      });
+
+      li.appendChild(setSpan);
+      li.appendChild(delBtn);
+      settingsNoteList.appendChild(li);
+    });
   }
+
+  function saveAndRenderNotes() {
+    localStorage.setItem(STORAGE_KEYS.NOTE, JSON.stringify(notesData));
+    renderNotes();
+  }
+
+  function addNote(text) {
+    if (!text.trim()) return;
+    notesData.push({ id: Date.now(), text: text.trim(), checked: false });
+    noteInput.value = '';
+    saveAndRenderNotes();
+  }
+
 
   // ==========================================================================
   // Settings Panel Drawer Functions
@@ -212,6 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event Handlers
   // ==========================================================================
 
+  // Window Resize to recalculate perimeter length coordinates
+  window.addEventListener('resize', updatePath);
+
   // Panel Open / Close controls
   settingsToggleBtn.addEventListener('click', openSettings);
   settingsCloseBtn.addEventListener('click', closeSettings);
@@ -229,9 +353,23 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFont(e.target.value);
   });
 
-  // Note Input field
-  noteInput.addEventListener('input', (e) => {
-    applyNote(e.target.value);
+  // Note Input field (Add Note)
+  noteInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      addNote(noteInput.value);
+    }
+  });
+
+  addNoteBtn.addEventListener('click', () => {
+    addNote(noteInput.value);
+  });
+
+  // Line Toggle
+  lineToggle.addEventListener('change', (e) => {
+    const isEnabled = e.target.checked;
+    lineToggleText.textContent = isEnabled ? 'Enabled' : 'Disabled';
+    borderPath.parentElement.style.opacity = isEnabled ? '1' : '0';
+    localStorage.setItem(STORAGE_KEYS.LINE_ENABLED, isEnabled ? 'true' : 'false');
   });
 
   // Primary preset color selector clicks
@@ -268,19 +406,56 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(STORAGE_KEYS.SECONDS_CUSTOM, e.target.value);
   });
 
+  // Line preset color selector clicks
+  linePresets.addEventListener('click', (e) => {
+    const btn = e.target.closest('.color-preset-btn');
+    if (!btn) return;
+    applyLineColor(btn.getAttribute('data-color'), false);
+  });
+
+  // Line custom color inputs
+  lineColorPicker.addEventListener('input', (e) => {
+    applyLineColor(e.target.value, true);
+    localStorage.setItem(STORAGE_KEYS.LINE_CUSTOM, e.target.value);
+  });
+  lineColorPicker.addEventListener('change', (e) => {
+    applyLineColor(e.target.value, true);
+    localStorage.setItem(STORAGE_KEYS.LINE_CUSTOM, e.target.value);
+  });
+
   // ==========================================================================
   // Initialization Sequence
   // ==========================================================================
   function init() {
-    // Read state caches
+    // 1. Set up dimensions
+    updatePath();
+
+    // 2. Read state caches
     const cachedFont = localStorage.getItem(STORAGE_KEYS.FONT) || 'Orbitron';
-    const cachedNote = localStorage.getItem(STORAGE_KEYS.NOTE) || '';
     const cachedPrimary = localStorage.getItem(STORAGE_KEYS.PRIMARY_COLOR) || '#ffffff';
     const cachedPrimaryCustom = localStorage.getItem(STORAGE_KEYS.PRIMARY_CUSTOM) || '#ffffff';
     const cachedSeconds = localStorage.getItem(STORAGE_KEYS.SECONDS_COLOR) || '#ffffff';
     const cachedSecondsCustom = localStorage.getItem(STORAGE_KEYS.SECONDS_CUSTOM) || '#ffffff';
+    const cachedLine = localStorage.getItem(STORAGE_KEYS.LINE_COLOR) || '#ffffff';
+    const cachedLineCustom = localStorage.getItem(STORAGE_KEYS.LINE_CUSTOM) || '#ffffff';
+    const cachedLineEnabled = localStorage.getItem(STORAGE_KEYS.LINE_ENABLED) !== 'false';
 
-    // Apply color pickers initial background states
+    // Parse Notes
+    try {
+      const cachedNote = localStorage.getItem(STORAGE_KEYS.NOTE);
+      if (cachedNote) {
+        if (cachedNote.startsWith('[')) {
+          notesData = JSON.parse(cachedNote);
+        } else {
+          // Migration from old string format
+          notesData = [{ id: Date.now(), text: cachedNote, checked: false }];
+        }
+      }
+    } catch(e) {
+      notesData = [];
+    }
+
+    // 3. Apply color pickers initial background states
     primaryColorPicker.value = cachedPrimaryCustom;
     primaryColorPreview.style.backgroundColor = cachedPrimaryCustom;
     primaryColorValue.textContent = cachedPrimaryCustom.toUpperCase();
@@ -289,9 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     secondsColorPreview.style.backgroundColor = cachedSecondsCustom;
     secondsColorValue.textContent = cachedSecondsCustom.toUpperCase();
 
-    // Set configuration values
+    lineColorPicker.value = cachedLineCustom;
+    lineColorPreview.style.backgroundColor = cachedLineCustom;
+    lineColorValue.textContent = cachedLineCustom.toUpperCase();
+
+    // 4. Set configuration values
     applyFont(cachedFont);
-    applyNote(cachedNote);
+    renderNotes();
 
     const isPrimaryPreset = presetColors.some(c => c.toLowerCase() === cachedPrimary.toLowerCase());
     applyPrimaryColor(cachedPrimary, !isPrimaryPreset);
@@ -299,7 +478,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const isSecondsPreset = presetColors.some(c => c.toLowerCase() === cachedSeconds.toLowerCase());
     applySecondsColor(cachedSeconds, !isSecondsPreset);
 
-    // Run high-precision animation loops
+    const isLinePreset = presetColors.some(c => c.toLowerCase() === cachedLine.toLowerCase());
+    applyLineColor(cachedLine, !isLinePreset);
+
+    // Apply Line Enabled State
+    lineToggle.checked = cachedLineEnabled;
+    lineToggleText.textContent = cachedLineEnabled ? 'Enabled' : 'Disabled';
+    borderPath.parentElement.style.opacity = cachedLineEnabled ? '1' : '0';
+
+    // 5. Run high-precision animation loops
     tick();
   }
 
